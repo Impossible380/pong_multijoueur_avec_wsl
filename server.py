@@ -54,9 +54,9 @@ while len(players) < 2:
     name = packet["data"]
 
     # Intégration du joueur dans la liste des joueurs
-    player = {"id": id, "name": name, "socket": sock}
+    player = {"id": id, "name": name, "goals": 0, "socket": sock}
     players.append(player)
-    print(f"{player['name']} arrived ! {len(players)}/2")
+    print(f"{player['name']} est arrivé ! {len(players)}/2")
 
     # Début du thread de réception
     thread_read = threading.Thread(target=handle_receive, args=(player, 1))
@@ -64,7 +64,7 @@ while len(players) < 2:
 
 # La partie va bientôt débuter
 for player in players:
-    send_string(player["socket"], "BEGIN")
+    send_string(player["socket"], "C'est parti !")
 
 
 """   Début Game   """
@@ -96,6 +96,13 @@ while is_playing:
 
         send_string(player["socket"], game.racket_2.color)
         send_position(player["socket"], *game.racket_2.position)
+    
+    if players[0]["goals"] >= 3:
+        print(f"Victoire de {players[0]['name']}")
+        is_playing = False
+    elif players[1]["goals"] >= 3:
+        print(f"Victoire de {players[1]['name']}")
+        is_playing = False
     
     time.sleep(0.1)
 """   Fin Game   """

@@ -10,9 +10,9 @@ move_right = lambda n: print(f"\x1b[{n}C", end="", flush=True)
 move_left = lambda n: print(f"\x1b[{n}D", end="", flush=True)
 
 
-def print_racket(color_str,x,y):
-    color_code = "41" if color_str == "red" else "46"
-    s = "".join([f"\x1b[{y+1+i};{x+1}H\x1b[{color_code};1m \x1b[{y+1-i};{x+1}H\x1b[{color_code};1m " for i in range(3)])
+def print_racket(c_str,x,y):
+    c_code = "41" if c_str == "red" else "46"
+    s = "".join([f"\x1b[{y+1+i};{x+1}H\x1b[{c_code};1m \x1b[{y+1-i};{x+1}H\x1b[{c_code};1m " for i in range(3)])
     print(s, end="", flush=True)
 
 

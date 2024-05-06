@@ -44,12 +44,10 @@ send_string(sock, name)
 # Mes informations
 myself = {"id": id, "name": name, "socket": sock}
 
-packet = read_packet(myself["socket"])
-current_string = packet["data"]
-
 # La partie va bientôt débuter
-if current_string == "BEGIN":
-    print("Let's go !")
+packet = read_packet(myself["socket"])
+game_start = packet["data"]
+print(game_start)
 
 is_playing = True
 
@@ -60,13 +58,13 @@ thread_send.start()
 erase_screen()
 hide_cursor()
 
-ball = {"color": "yellow", "position": (60, 12)}
+ball = {"color": "yellow", "position": (60, 14)}
 print_ball(*ball["position"])
 
-racket_1 = {"color": "blue", "position": (30, 12)}
+racket_1 = {"color": "blue", "position": (30, 14)}
 print_racket(racket_1["color"], *racket_1["position"])
 
-racket_2 = {"color": "red", "position": (90, 12)}
+racket_2 = {"color": "red", "position": (90, 14)}
 print_racket(racket_2["color"], *racket_2["position"])
 
 

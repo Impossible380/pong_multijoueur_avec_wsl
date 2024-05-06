@@ -1,4 +1,5 @@
 from pong_terminal import *
+import time
 
 
 class Game:
@@ -6,67 +7,71 @@ class Game:
         self.screen = (width, height)
         self.players = players
 
-        self.ball = Ball("yellow", (60, 12))
+        self.ball_default_position = (60, 14)
+        self.racket_1_default_position = (30, 14)
+        self.racket_2_default_position = (90, 14)
 
-        self.racket_1 = Racket("blue", (30, 12))
-        self.racket_2 = Racket("red", (90, 12))
+        self.ball = Entity("yellow", self.ball_default_position)
+        self.racket_1 = Entity("blue", self.racket_1_default_position)
+        self.racket_2 = Entity("red", self.racket_2_default_position)
     
-    def ball_collision(self, axis, axis_move_ball, first_point, last_point):
-        axis = int(axis)
+    def ball_touch_wall(self, axis, axis_move_ball):
+        if axis == 0:
+            if self.ball.position[0] + 1 >= self.screen[0]:
+                self.players[0]["goals"] += 1
 
-        if self.ball.position[axis] <= first_point[axis] or \
-                self.ball.position[axis] >= last_point[axis]:
-            self.ball.position[axis] -= axis_move_ball
-            return -axis_move_ball
+                self.ball.position = list(self.ball_default_position)
+                self.racket_1.position = list(self.racket_1_default_position)
+                self.racket_2.position = list(self.racket_2_default_position)
+                axis_move_ball = -axis_move_ball
+                time.sleep(1)
+            
+            elif self.ball.position[0] <= 0:
+                self.players[1]["goals"] += 1
+
+                self.ball.position = list(self.ball_default_position)
+                self.racket_1.position = list(self.racket_1_default_position)
+                self.racket_2.position = list(self.racket_2_default_position)
+                axis_move_ball = -axis_move_ball
+                time.sleep(1)
         
         else:
-            return axis_move_ball
+            if self.ball.position[1] <= 4 or \
+                    self.ball.position[1] >= self.screen[1]:
+                self.ball.position[1] -= axis_move_ball
+                axis_move_ball = -axis_move_ball
+        
+        return axis_move_ball
+    
+    def ball_touch_racket(self, x_move_ball, y_move_ball, player_id):
+        racket = self.racket_1 if player_id == 1 else self.racket_2
+
+        if self.ball.position[0] + 2 >= racket.position[0] and \
+                self.ball.position[0] - 1 <= racket.position[0] and \
+                self.ball.position[1] + 1 >= racket.position[1] - 2 and \
+                self.ball.position[1] - 1 <= racket.position[1] + 2:
+            
+            if self.ball.position[0] + 1 <= racket.position[0] or \
+                    self.ball.position[0] >= racket.position[0]:
+                self.ball.position[0] -= x_move_ball
+                x_move_ball = -x_move_ball
+            
+            if self.ball.position[1] + 1 <= racket.position[1] - 2 or \
+                    self.ball.position[1] - 1 >= racket.position[1] + 2:
+                self.ball.position[1] -= y_move_ball
+                y_move_ball = -y_move_ball
+
+        return x_move_ball, y_move_ball
 
     def move_ball(self, x_move_ball, y_move_ball):
         self.ball.position[0] += x_move_ball
         self.ball.position[1] += y_move_ball
 
-        x_move_ball = self.ball_collision(0, x_move_ball, (0, 0), self.screen)
-        y_move_ball = self.ball_collision(1, y_move_ball, (0, 0), self.screen)
+        x_move_ball = self.ball_touch_wall(0, x_move_ball)
+        y_move_ball = self.ball_touch_wall(1, y_move_ball)
 
-        x_move_ball = self.ball_collision(0, x_move_ball, self.racket_1.position,
-                                          self.racket_1.position)
-        y_move_ball = self.ball_collision(1, y_move_ball, self.racket_1.position - 2,
-                                          self.racket_1.position + 2)
-
-        x_move_ball = self.ball_collision(0, x_move_ball, self.racket_2.position,
-                                          self.racket_2.position)
-        y_move_ball = self.ball_collision(1, y_move_ball, self.racket_2.position - 2,
-                                          self.racket_2.position + 2)
-
-        """ if self.ball.position[0] <= 0 or self.ball.position[0] >= self.width:
-            x_move_ball = -x_move_ball
-            self.ball.position[0] += x_move_ball
-        
-        if self.ball.position[1] <= 0 or self.ball.position[1] >= self.height:
-            y_move_ball = -y_move_ball
-            self.ball.position[1] += y_move_ball
-        
-        if self.ball.position[0] >= self.racket_1.position[0] and \
-                self.ball.position[0] <= self.racket_1.position[0]:
-            x_move_ball = -x_move_ball
-            self.ball.position[1] += x_move_ball
-        
-        if self.ball.position[1] >= self.racket_1.position[1] and \
-                self.ball.position[1] <= self.racket_1.position[1]:
-            y_move_ball = -y_move_ball
-            self.ball.position[1] += y_move_ball
-        
-        if self.ball.position[0] >= self.racket_2.position[0] and \
-                self.ball.position[0] <= self.racket_2.position[0]:
-            x_move_ball = -x_move_ball
-            self.ball.position[1] += x_move_ball
-        
-        if self.ball.position[1] >= self.racket_2.position[1] and \
-                self.ball.position[1] <= self.racket_2.position[1]:
-            y_move_ball = -y_move_ball
-            self.ball.position[1] += y_move_ball """
-
+        for player in self.players:
+            x_move_ball, y_move_ball = self.ball_touch_racket(x_move_ball, y_move_ball, player["id"])
         
         return x_move_ball, y_move_ball
     
@@ -75,17 +80,11 @@ class Game:
 
         racket.position[1] += y_move_racket
 
-        if racket.position[1] < 2 or racket.position[1] > self.height - 2:
+        if racket.position[1] < 2 or racket.position[1] > self.screen[1] - 2:
             racket.position[1] -= y_move_racket
 
 
-class Ball:
-    def __init__(self, color, position):
-        self.color = color
-        self.position = list(position)
-
-
-class Racket:
+class Entity:
     def __init__(self, color, position):
         self.color = color
         self.position = list(position)
@@ -110,11 +109,11 @@ if __name__ == "__main__":
         x_move_ball, y_move_ball = game.move_ball(x_move_ball, y_move_ball)
 
         if key_int == 0:
-            game.move_racket(player["id"], -1)
+            game.move_racket(last_player["id"], -1)
             key_int = 2
 
         if key_int == 1:
-            game.move_racket(player["id"], 1)
+            game.move_racket(last_player["id"], 1)
             key_int = 2
 
         for player in players:
@@ -128,6 +127,13 @@ if __name__ == "__main__":
 
             send_string(player["socket"], game.racket_2.color)
             send_position(player["socket"], *game.racket_2.position)
+        
+        if players[0]["goals"] >= 3:
+            print(f"Victoire de {players[0]['name']}")
+            is_playing = False
+        elif players[1]["goals"] >= 3:
+            print(f"Victoire de {players[1]['name']}")
+            is_playing = False
         
         time.sleep(0.1)
     """   Fin Game   """
