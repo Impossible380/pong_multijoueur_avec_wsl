@@ -24,10 +24,14 @@ def handle_send(myself):
             send_key(myself["socket"], key_int)
 
 
+# Connexion au serveur
 server = ("172.24.193.202", 8080)
 
 # AF_INET (address family) : on utiliuse l'ipv4
 # SOCK_STREAM : Transmission Control Protocol (TCP)
+
+
+# Mon initialisation
 
 # Mon socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,17 +48,20 @@ send_string(sock, name)
 # Mes informations
 myself = {"id": id, "name": name, "socket": sock}
 
+
 # La partie va bientôt débuter
+is_playing = True
+
 packet = read_packet(myself["socket"])
 game_start = packet["data"]
 print(game_start)
-
-is_playing = True
 
 # Début du thread d'envoi
 thread_send = threading.Thread(target=handle_send, args=(myself,))
 thread_send.start()
 
+
+# Initialisation des entités
 erase_screen()
 hide_cursor()
 

@@ -24,19 +24,16 @@ def handle_receive(player, log_level=0):
             last_player = player
 
 
+# Création du serveur
 IP = "172.24.193.202"
 PORT = 8080
 
 server = socket.create_server((IP, PORT))
 
-is_playing = True
-key_int = 2
-last_player = {}
 
+# Initialisation des joueurs
 players = []
 id = 0
-
-game = Game(120, 24, players)
 
 while len(players) < 2:
     id += 1
@@ -54,20 +51,27 @@ while len(players) < 2:
     name = packet["data"]
 
     # Intégration du joueur dans la liste des joueurs
-    player = {"id": id, "name": name, "goals": 0, "socket": sock}
+    player = {"id": id, "name": name, "score": 0, "socket": sock}
     players.append(player)
     print(f"{player['name']} est arrivé ! {len(players)}/2")
+
+
+# Préparation
+is_playing = True
+key_int = 2
+last_player = {}
+
+for player in players:
+    send_string(player["socket"], "C'est parti !")
 
     # Début du thread de réception
     thread_read = threading.Thread(target=handle_receive, args=(player, 1))
     thread_read.start()
 
-# La partie va bientôt débuter
-for player in players:
-    send_string(player["socket"], "C'est parti !")
-
 
 """   Début Game   """
+game = Game(players)
+
 x_move_ball = 2
 y_move_ball = 1
 
@@ -97,11 +101,16 @@ while is_playing:
         send_string(player["socket"], game.racket_2.color)
         send_position(player["socket"], *game.racket_2.position)
     
-    if players[0]["goals"] >= 3:
-        print(f"Victoire de {players[0]['name']}")
+    # print(f"{game.players[0]['points']} - {game.players[1]['points']}")
+
+    print_score(game.players[0]["score"], 30)
+    print_score(game.players[1]["score"], 90)
+    
+    if game.players[0]["score"] >= 3:
+        print(f"Victoire de {game.players[0]['name']}")
         is_playing = False
-    elif players[1]["goals"] >= 3:
-        print(f"Victoire de {players[1]['name']}")
+    elif game.players[1]["score"] >= 3:
+        print(f"Victoire de {game.players[1]['name']}")
         is_playing = False
     
     time.sleep(0.1)

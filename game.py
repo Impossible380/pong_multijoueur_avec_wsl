@@ -3,9 +3,9 @@ import time
 
 
 class Game:
-    def __init__(self, width, height, players):
-        self.screen = (width, height)
+    def __init__(self, players):
         self.players = players
+        self.screen = (120, 24)
 
         self.ball_default_position = (60, 14)
         self.racket_1_default_position = (30, 14)
@@ -18,7 +18,7 @@ class Game:
     def ball_touch_wall(self, axis, axis_move_ball):
         if axis == 0:
             if self.ball.position[0] + 1 >= self.screen[0]:
-                self.players[0]["goals"] += 1
+                self.players[0]["score"] += 1
 
                 self.ball.position = list(self.ball_default_position)
                 self.racket_1.position = list(self.racket_1_default_position)
@@ -27,7 +27,7 @@ class Game:
                 time.sleep(1)
             
             elif self.ball.position[0] <= 0:
-                self.players[1]["goals"] += 1
+                self.players[1]["score"] += 1
 
                 self.ball.position = list(self.ball_default_position)
                 self.racket_1.position = list(self.racket_1_default_position)
@@ -93,12 +93,13 @@ class Entity:
 if __name__ == "__main__":
     players = [{"name": "Dif_269"}, {"name": "Imp_369"}]
 
-    game = Game(120, 24, players)
     is_playing = True
 
 
     # Test unitaire du module 'game.py'
     """   Début Game   """
+    game = Game(players)
+
     x_move_ball = 2
     y_move_ball = 1
 
@@ -128,11 +129,16 @@ if __name__ == "__main__":
             send_string(player["socket"], game.racket_2.color)
             send_position(player["socket"], *game.racket_2.position)
         
-        if players[0]["goals"] >= 3:
-            print(f"Victoire de {players[0]['name']}")
+        # print(f"{game.players[0]['points']} - {game.players[1]['points']}")
+
+        print_score(game.players[0]["score"], 30)
+        print_score(game.players[1]["score"], 90)
+        
+        if game.players[0]["score"] >= 3:
+            print(f"Victoire de {game.players[0]['name']}")
             is_playing = False
-        elif players[1]["goals"] >= 3:
-            print(f"Victoire de {players[1]['name']}")
+        elif game.players[1]["score"] >= 3:
+            print(f"Victoire de {game.players[1]['name']}")
             is_playing = False
         
         time.sleep(0.1)

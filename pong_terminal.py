@@ -19,3 +19,8 @@ def print_racket(c_str,x,y):
 def erase_racket(x,y):
     s = "".join([f"\x1b[{y+1+i};{x+1}H\x1b[40;1m \x1b[{y+1-i};{x+1}H\x1b[40;1m " for i in range(3)])
     print(s, end="", flush=True)
+
+
+def print_score(points, x):
+    s = "".join([f"\x1b[{2};{x+1}H\x1b[{points};1m "])
+    print(s, end="", flush=True)
