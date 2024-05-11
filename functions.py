@@ -20,8 +20,7 @@ def send_string(sock, character_string):
 
 
 def read_number(sock):
-    number = int.from_bytes(sock.recv(4), "big")
-    return number
+    return int.from_bytes(sock.recv(4), "big")
 
 
 def read_packet(sock: str):

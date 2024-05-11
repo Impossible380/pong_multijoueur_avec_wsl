@@ -65,31 +65,66 @@ thread_send.start()
 erase_screen()
 hide_cursor()
 
+print_wall()
+
 ball = {"color": "yellow", "position": (60, 14)}
 print_ball(*ball["position"])
 
-racket_1 = {"color": "blue", "position": (30, 14)}
+ball = {"color": "yellow", "position": (60, 14)}
+print_ball(*ball["position"])
+
+racket_1 = {"color": "blue", "position": (20, 14)}
 print_racket(racket_1["color"], *racket_1["position"])
 
-racket_2 = {"color": "red", "position": (90, 14)}
+racket_2 = {"color": "red", "position": (100, 14)}
 print_racket(racket_2["color"], *racket_2["position"])
 
 
+number_packet = 0
 # Routine de réception
 while is_playing:
-    color_packet = read_packet(myself["socket"])
-    color = color_packet["data"]
-    position_packet = read_packet(myself["socket"])
+    number_packet += 1
 
-    if position_packet["type"] == "pos":
-        if color == ball["color"]:
-            erase_ball(*ball["position"])
-            ball["position"] = position_packet["data"]
-            print_ball(*ball["position"])
+    if number_packet != 4:
+        c_packet = read_packet(myself["socket"])
+        color = c_packet["data"]
+        
+        packet = read_packet(myself["socket"])
 
+        if packet["type"] == "pos":
+            if color == ball["color"]:
+                erase_ball(*ball["position"])
+                ball["position"] = packet["data"]
+                print_ball(*ball["position"])
+
+            else:
+                racket = racket_1 if color == racket_1["color"] else racket_2
+                
+                erase_racket(*racket["position"])
+                racket["position"] = packet["data"]
+                print_racket(racket["color"], *racket["position"])
+    
+    else:
+        score_1 = read_number(myself["socket"])
+        score_2 = read_number(myself["socket"])
+
+        print_message(30, score_1)
+        print_message(90, score_2)
+
+        if myself["id"] == 1:
+            my_score = score_1
+            opponent_score = score_2
         else:
-            racket = racket_1 if color == racket_1["color"] else racket_2
-            
-            erase_racket(*racket["position"])
-            racket["position"] = position_packet["data"]
-            print_racket(racket["color"], *racket["position"])
+            my_score = score_2
+            opponent_score = score_1
+        
+        if my_score >= 3:
+            print_message(48, f"Bravo, vous avez gagné !")
+            is_playing = False
+            thread_send.join()
+        elif opponent_score >= 3:
+            print_message(48, f"Dommage, vous avez perdu !")
+            is_playing = False
+            thread_send.join()
+        
+        number_packet = 0

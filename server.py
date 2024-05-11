@@ -72,7 +72,7 @@ for player in players:
 """   Début Game   """
 game = Game(players)
 
-x_move_ball = 2
+x_move_ball = 3
 y_move_ball = 1
 
 time.sleep(1)
@@ -88,30 +88,25 @@ while is_playing:
     if key_int == 1:
         game.move_racket(last_player["id"], 1)
         key_int = 2
-
-    for player in players:
-        # Envoi de la position de la balle
-        send_string(player["socket"], game.ball.color)
-        send_position(player["socket"], *game.ball.position)
-
-        # Envoi de la position des raquettes
-        send_string(player["socket"], game.racket_1.color)
-        send_position(player["socket"], *game.racket_1.position)
-
-        send_string(player["socket"], game.racket_2.color)
-        send_position(player["socket"], *game.racket_2.position)
     
-    # print(f"{game.players[0]['points']} - {game.players[1]['points']}")
+    entities = [game.ball, game.racket_1, game.racket_2]
 
-    print_score(game.players[0]["score"], 30)
-    print_score(game.players[1]["score"], 90)
+    for player in game.players:
+        # Envoi de la position de la balle et des raquettes
+        for entity in entities:
+            send_string(player["socket"], entity.color)
+            send_position(player["socket"], *entity.position)
+
+        # Envoi des scores
+        send_number(player["socket"], game.players[0]["score"])
+        send_number(player["socket"], game.players[1]["score"])
     
     if game.players[0]["score"] >= 3:
-        print(f"Victoire de {game.players[0]['name']}")
         is_playing = False
+        thread_read.join()
     elif game.players[1]["score"] >= 3:
-        print(f"Victoire de {game.players[1]['name']}")
         is_playing = False
+        thread_read.join()
     
     time.sleep(0.1)
 """   Fin Game   """
