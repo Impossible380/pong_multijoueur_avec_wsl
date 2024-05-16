@@ -19,7 +19,7 @@ def handle_send(myself):
         char = getchar(echo=False)
 
         if char == "z" or char == "s":
-            key_int = 0 if char == "z" else 1
+            key_int = 2 if char == "z" else 1
 
             send_key(myself["socket"], key_int)
 
@@ -35,7 +35,6 @@ server = ("172.24.193.202", 8080)
 
 # Mon socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.setblocking(True)
 sock.connect(server)
 
 # Mon id
@@ -120,11 +119,12 @@ while is_playing:
         
         if my_score >= 3:
             print_message(48, f"Bravo, vous avez gagné !")
-            is_playing = False
-            thread_send.join()
+            break
         elif opponent_score >= 3:
             print_message(48, f"Dommage, vous avez perdu !")
-            is_playing = False
-            thread_send.join()
+            break
         
         number_packet = 0
+
+is_playing = False
+thread_send.join()

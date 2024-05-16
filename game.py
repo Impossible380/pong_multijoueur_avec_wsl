@@ -15,26 +15,25 @@ class Game:
         self.racket_1 = Entity("blue", self.racket_1_default_position)
         self.racket_2 = Entity("red", self.racket_2_default_position)
     
+    def goal(self, axis_move_ball):
+        self.ball.position = list(self.ball_default_position)
+        self.racket_1.position = list(self.racket_1_default_position)
+        self.racket_2.position = list(self.racket_2_default_position)
+        time.sleep(1)
+        return -axis_move_ball
+    
     def ball_touch_wall(self, axis, axis_move_ball):
         if axis == 0:
             if self.ball.position[0] + 2 >= self.screen[0]:
                 self.players[0]["score"] += 1
 
-                self.ball.position = list(self.ball_default_position)
-                self.racket_1.position = list(self.racket_1_default_position)
-                self.racket_2.position = list(self.racket_2_default_position)
-                axis_move_ball = -axis_move_ball
-                time.sleep(1)
+                axis_move_ball = self.goal(axis_move_ball)
             
             elif self.ball.position[0] <= 0:
                 self.players[1]["score"] += 1
 
-                self.ball.position = list(self.ball_default_position)
-                self.racket_1.position = list(self.racket_1_default_position)
-                self.racket_2.position = list(self.racket_2_default_position)
-                axis_move_ball = -axis_move_ball
-                time.sleep(1)
-        
+                axis_move_ball = self.goal(axis_move_ball)
+                
         else:
             if self.ball.position[1] <= 4 or \
                     self.ball.position[1] >= self.screen[1]:
@@ -72,6 +71,8 @@ class Game:
 
         for player in self.players:
             x_move_ball, y_move_ball = self.ball_touch_racket(x_move_ball, y_move_ball, player["id"])
+    
+        time.sleep(0.1)
         
         return x_move_ball, y_move_ball
     
@@ -88,51 +89,3 @@ class Entity:
     def __init__(self, color, position):
         self.color = color
         self.position = list(position)
-
-
-if __name__ == "__main__":
-    players = [{"name": "Dif_269"}, {"name": "Imp_369"}]
-
-    is_playing = True
-
-
-    # Test unitaire du module 'game.py'
-    """   Début Game   """
-    game = Game(players)
-
-    x_move_ball = 3
-    y_move_ball = 1
-
-    time.sleep(1)
-    # Routine d'envoi
-    while is_playing:
-        # Mouvement de la balle
-        x_move_ball, y_move_ball = game.move_ball(x_move_ball, y_move_ball)
-
-        if key_int == 0:
-            game.move_racket(last_player["id"], -1)
-            key_int = 2
-
-        if key_int == 1:
-            game.move_racket(last_player["id"], 1)
-            key_int = 2
-        
-        entities = [game.ball, game.racket_1, game.racket_2]
-
-        for player in game.players:
-            # Envoi de la position de la balle et des raquettes
-            for entity in entities:
-                send_string(player["socket"], entity.color)
-                send_position(player["socket"], *entity.position)
-
-            # Envoi des scores
-            send_number(player["socket"], game.players[0]["score"])
-            send_number(player["socket"], game.players[1]["score"])
-        
-        if game.players[0]["score"] >= 3:
-            is_playing = False
-        elif game.players[1]["score"] >= 3:
-            is_playing = False
-        
-        time.sleep(0.1)
-    """   Fin Game   """
